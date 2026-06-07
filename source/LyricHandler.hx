@@ -34,6 +34,7 @@ class LyricHandler extends FlxBasic {
     public var linesPlayed:Int = 0;
 
     public var extras:Map<String, String> = [];
+    public var offset:Float = 0;
 
     public function new(){
         super();
@@ -56,8 +57,10 @@ class LyricHandler extends FlxBasic {
             if (timestamp == -1) continue;
             if (Math.isNaN(timestamp)) {
                 if (line == "") continue;
-                var split = [line.substring(0, line.indexOf(":")), line.substring(line.indexOf(":") + 1)];
+                var split = [StringTools.trim(line.substring(0, line.indexOf(":"))), StringTools.trim(line.substring(line.indexOf(":") + 1))];
                 extras.set(split[0], split[1]);
+
+                if (split[0] == "offset") offset = Std.parseFloat(split[1]);
                 continue;
             }
 
@@ -86,7 +89,7 @@ class LyricHandler extends FlxBasic {
     override public function update(elapsed:Float):Void {
 
         for (i in sequence) {
-            if (i.timestamp < Conductor.songPosition && !i.played) {
+            if ((i.timestamp + offset) < Conductor.songPosition && !i.played) {
                 i.played = true;
                 onLyricShow.dispatch(i);
                 elapsedLines.push(unplayedLines.shift());
