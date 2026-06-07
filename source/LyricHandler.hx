@@ -57,9 +57,13 @@ class LyricHandler extends FlxBasic {
             if (timestamp == -1) continue;
             if (Math.isNaN(timestamp)) {
                 if (line == "") continue;
-                var split = [StringTools.trim(line.substring(0, line.indexOf(":"))), StringTools.trim(line.substring(line.indexOf(":") + 1))];
+                var split = [
+                    inBrackets.substring(1, inBrackets.indexOf(":")),
+                    inBrackets.substring(inBrackets.indexOf(":") + 1)
+                ];
                 if (split[0] == "#") continue;
                 extras.set(split[0], split[1]);
+                trace(split[0] + ": " + split[1]);
 
                 if (split[0] == "offset") offset = Std.parseFloat(split[1]);
                 continue;
