@@ -33,6 +33,7 @@ class LyricHandler extends FlxBasic {
 
     public var linesPlayed:Int = 0;
 
+    public var extras:Map<String, String> = [];
 
     public function new(){
         super();
@@ -55,7 +56,9 @@ class LyricHandler extends FlxBasic {
             if (timestamp == -1) continue;
             if (Math.isNaN(timestamp)) {
                 if (line == "") continue;
-                
+                var split = [line.substring(0, line.indexOf(":")), line.substring(line.indexOf(":") + 1)];
+                extras.set(split[0], split[1]);
+                continue;
             }
 
             var seq:SequencedLine = new SequencedLine(timestamp, line.substring(line.indexOf("]") + 1));
