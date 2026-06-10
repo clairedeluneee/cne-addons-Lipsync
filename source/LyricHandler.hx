@@ -29,11 +29,26 @@ class LyricHandler extends FlxBasic {
      */
     public var elapsedLines:Array<SequencedLine> = [];
 
-    public var onLyricShow;
+    /**
+     * Dynamic that fires if the next line is played.
+     */
+    public var onLyricShow:Dynamic<SequencedLine -> Void>;
 
+    /**
+     * Number of lines played so far.
+     */
     public var linesPlayed:Int = 0;
 
+    /**
+     * Map that shows ID tags. Useful for metadata.
+     */
     public var extras:Map<String, String> = [];
+
+    /**
+     * Determines how much to offset the lyrics for synchronization in milliseconds 
+     * 
+     * To apply it, add `[offset:n]` in your lyric file, or alternatively, set this variable directly.
+     */
     public var offset:Float = 0;
 
     public function new(){
@@ -87,7 +102,8 @@ class LyricHandler extends FlxBasic {
             var fileContent:String = File.getContent("./mods/" + ModsFolder.currentModFolder + '/songs/$song/$difficulty.lrc');
             parseString(fileContent);
         } catch (e:Exception) {
-            trace(e);
+            trace('Can\'t find $difficulty.lrc for song $song, does it exist?');
+            trace("Exception: " + e);
         }
     }
 
