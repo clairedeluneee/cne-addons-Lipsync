@@ -78,14 +78,13 @@ class LyricHandler extends FlxBasic {
 				if (split[0] == "#")
 					continue;
 				extras.set(split[0], split[1]);
-				trace(split[0] + ": " + split[1]);
 
 				if (split[0] == "offset")
 					offset = Std.parseFloat(split[1]);
 				continue;
 			}
 
-			var seq:SequencedLine = new SequencedLine(timestamp, line.substring(line.indexOf("]") + 1));
+			var seq:SequencedLine = new SequencedLine(timestamp, StringTools.trim(line.substring(line.indexOf("]") + 1)));
 
 			sequence.push(seq);
 			unplayedLines.push(seq);

@@ -1,5 +1,6 @@
 package;
 
+import StringTools;
 import source.ClefUtils;
 import source.SequencedLine;
 import source.LyricHandler;
@@ -15,9 +16,9 @@ function postCreate() {
 
 	lemeta = ClefUtils.makeText(32, 32, "meow", 16, "right", true);
 
-	lemeta.text = lrc.extras["ti"] ?? "?";
-	lemeta.text += "\nby" + lrc.extras["ar"] ?? "?";
-	lemeta.text += "\nfrom" + lrc.extras["al"] ?? "?";
+	lemeta.text = StringTools.trim(lrc.extras["ti"]) ?? "?";
+	lemeta.text += "\nby " + StringTools.trim(lrc.extras["ar"]) ?? "?";
+	lemeta.text += "\nfrom " + StringTools.trim(lrc.extras["al"]) ?? "?";
 
 	lemeta.x = window.width - 16 - lemeta.width;
 	lemeta.y = window.height - 16 - lemeta.height;
