@@ -64,6 +64,9 @@ class LyricHandler extends FlxBasic {
 			line = StringTools.trim(line);
 			var inBrackets:String = line.substring(line.indexOf("["), line.indexOf("]"));
 
+			if (StringTools.trim(line.indexOf("[")) != 0)
+				continue;
+
 			var timestamp:Float = SequencedLine.convertFromFormattedTime(inBrackets);
 
 			if (timestamp == -1)
