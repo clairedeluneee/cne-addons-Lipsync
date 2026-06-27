@@ -58,7 +58,14 @@ class LyricHandler extends FlxBasic {
 	 * @param string
 	 */
 	public function parseString(string:String):Void {
+		var lengthofBothArrays:Int = sequence.length;
+
+		sequence.resize(0);
+		unplayedLines.resize(0);
+		elapsedLines.resize(0);
+
 		var candidates:Array<String> = string.split("\n");
+		var gotLines:Int = 0;
 
 		for (line in candidates) {
 			line = StringTools.trim(line);
@@ -87,11 +94,18 @@ class LyricHandler extends FlxBasic {
 				continue;
 			}
 
-			var seq:SequencedLine = new SequencedLine(timestamp, StringTools.trim(line.substring(line.indexOf("]") + 1)));
+			var seq:SequencedLine = new SequencedLine(timestamp, StringTools.trim(line.substring(line.indexOf("]") + 1)), gotLines);
+
+			gotLines++;
 
 			sequence.push(seq);
 			unplayedLines.push(seq);
 		}
+
+		var blank:SequencedLine = new SequencedLine(0, "", -1);
+
+		sequence.insert(0, blank);
+		unplayedLines.insert(0, blank);
 	}
 
 	/**
@@ -111,6 +125,19 @@ class LyricHandler extends FlxBasic {
 			trace('Can\'t find $difficulty.lrc for song $song, does it exist?');
 			trace("Exception: " + e);
 		}
+	}
+
+	/**
+	 * Gets a `SequencedLine` at this timestamp.
+	 */
+	public function getLineAtTime(time:Float) {
+		var ind:Int = 0;
+		for (i in sequence) {
+			if (i.timestamp <= time)
+				ind++;
+		}
+
+		return sequence[ind];
 	}
 
 	override public function update(elapsed:Float):Void {
