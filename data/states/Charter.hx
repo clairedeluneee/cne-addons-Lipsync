@@ -32,11 +32,18 @@ function update(delta) {
 
 var toggled:Bool = true;
 var progress:Float = 0;
+var lastIdPlayed = -2;
 
 function postUpdate(delta) {
 	var atTimestamp:SequencedLine = lrc.sequence[lrc.getLineAtTime(Conductor.songPosition).id];
+
+	if (atTimestamp.id != lastIdPlayed) {
+		lyrCurrentLine.y += lyrCurrentLine.height * (atTimestamp.id - lastIdPlayed < 0 ? -1 : 1);
+	}
+	lastIdPlayed = atTimestamp.id;
+
 	lyrCurrentLine.text = atTimestamp.content;
-	lyrCurrentLine.y = uiCamera.height / 2 - lyrCurrentLine.height / 2;
+	lyrCurrentLine.y = CoolUtil.fpsLerp(lyrCurrentLine.y, uiCamera.height / 2 - lyrCurrentLine.height / 2, 0.2);
 
 	if (FlxG.keys.justPressed.L) {
 		toggled = !toggled;
