@@ -6,11 +6,15 @@ import source.SequencedLine;
 import source.ClefUtils;
 
 var lrc = new LyricHandler();
-var nextLine:FunkinText = ClefUtils.makeText(16, 720 - 16 - 16, "guh", 12, "left", true);
+var nextLine:FunkinText = ClefUtils.makeText(16, 720 - 16 - 16, "", 12, "left", true);
 var curLine:FunkinText = ClefUtils.makeText(16, 720 - 16 - 32, "", 16, "left", true);
 
 function postCreate() {
 	lrc.parseFromSong(SONG.meta.name, PlayState.difficulty);
+
+	if (lrc.sequence.length == 0)
+		disableScript();
+
 	lrc.onLyricShow.add(lyricShow);
 
 	add(nextLine).camera = camHUD;
