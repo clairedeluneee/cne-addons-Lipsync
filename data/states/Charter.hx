@@ -2,6 +2,7 @@ import source.ClefUtils;
 import source.LyricHandler;
 import source.SequencedLine;
 import funkin.editors.charter.Charter;
+import funkin.editors.ui.UITopMenu;
 import flixel.FlxG;
 
 var lrc:LyricHandler = new LyricHandler();
@@ -9,6 +10,30 @@ var lyrPreviousLine:FunkinText = ClefUtils.makeText(4, 4, "", 12);
 var lyrCurrentLine:FunkinText = ClefUtils.makeText(4, 4, "", 16);
 var lyrNextLine:FunkinText = ClefUtils.makeText(4, 4, "", 12);
 var lyrCamera:HudCamera = ClefUtils.makeCamera(true);
+var liveReload:Bool = true;
+var toggled:Bool = true;
+var progress:Float = 0;
+var lastIdPlayed = -2;
+
+var topMenuShit:Array<Dynamic> = [
+	null,
+	{
+		label: "Show lyrics preview",
+		onSelect: function(d) {
+			toggled = !toggled;
+			topMenu[3].childs[topMenu[3].childs.indexOf(topMenuShit[1])].icon = toggled ? 1 : 0;
+		},
+		icon: 1,
+	},
+	{
+		label: "Live reload",
+		onSelect: function(d) {
+			liveReload = !liveReload;
+			topMenu[3].childs[topMenu[3].childs.indexOf(topMenuShit[2])].icon = liveReload ? 1 : 0;
+		},
+		icon: 1,
+	}
+];
 
 function postCreate() {
 	for (i in [lyrPreviousLine, lyrCurrentLine, lyrNextLine]) {
@@ -19,9 +44,15 @@ function postCreate() {
 	lyrNextLine.color = lyrPreviousLine.color = 0xff888888;
 
 	lrc.parseFromSong(Charter.__song, Charter.__diff);
+
+	for (i in topMenuShit) {
+		topMenu[3].childs.push(i);
+	}
 }
 
 function onFocus() {
+	if (!liveReload)
+		return;
 	trace("Reparsing...");
 	lrc.parseFromSong(Charter.__song, Charter.__diff);
 }
@@ -30,9 +61,9 @@ function update(delta) {
 	lrc.update(delta);
 }
 
-var toggled:Bool = true;
-var progress:Float = 0;
-var lastIdPlayed = -2;
+function toggle() {
+	toggled = !toggled;
+}
 
 function postUpdate(delta) {
 	var atTimestamp:SequencedLine = lrc.sequence[lrc.getLineAtTime(Conductor.songPosition).id];
@@ -46,7 +77,7 @@ function postUpdate(delta) {
 	lyrCurrentLine.y = CoolUtil.fpsLerp(lyrCurrentLine.y, uiCamera.height / 2 - lyrCurrentLine.height / 2, 0.2);
 
 	if (FlxG.keys.justPressed.L) {
-		toggled = !toggled;
+		toggle();
 	}
 
 	progress += delta * 2.5 * (toggled ? 1 : -1);
