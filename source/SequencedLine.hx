@@ -10,11 +10,13 @@ class SequencedLine {
 	public var content:String = "";
 	public var played:Bool = false;
 	public var id:Int = 0;
+	public var lineInFile:Int = 0;
 
-	public function new(ts:Float, ct:String, id:Int) {
+	public function new(ts:Float, ct:String, id:Int, l:Int) {
 		this.timestamp = ts;
 		this.content = ct;
 		this.id = id;
+		this.lineInFile = l;
 	}
 
 	/**

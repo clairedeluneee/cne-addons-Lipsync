@@ -4,6 +4,7 @@ import source.SequencedLine;
 import funkin.editors.charter.Charter;
 import funkin.editors.ui.UITopMenu;
 import flixel.FlxG;
+import flixel.input.keyboard.FlxKey;
 
 var lrc:LyricHandler = new LyricHandler();
 var lyrPreviousLine:FunkinText = ClefUtils.makeText(4, 4, "", 12);
@@ -15,24 +16,45 @@ var toggled:Bool = true;
 var progress:Float = 0;
 var lastIdPlayed = -2;
 
-var topMenuShit:Array<Dynamic> = [
+var topMenu_ViewShit:Array<Dynamic> = [
 	null,
 	{
 		label: "Show lyrics preview",
 		onSelect: function(d) {
 			toggled = !toggled;
-			topMenu[3].childs[topMenu[3].childs.indexOf(topMenuShit[1])].icon = toggled ? 1 : 0;
+			topMenu[3].childs[topMenu[3].childs.indexOf(topMenu_ViewShit[1])].icon = toggled ? 1 : 0;
 		},
 		icon: 1,
+		keybind: [FlxKey.L]
+	},
+];
+
+var topMenu_EditShit:Array<Dynamic> = [
+	null,
+	{
+		label: "Seek to current lyric position",
+		onSelect: function(d) {
+			if (lrc.currentLine != null) {
+				Conductor.songPosition = lrc.currentLine.timestamp;
+			}
+		},
 	},
 	{
-		label: "Live reload",
+		label: "Live reparse",
 		onSelect: function(d) {
 			liveReload = !liveReload;
-			topMenu[3].childs[topMenu[3].childs.indexOf(topMenuShit[2])].icon = liveReload ? 1 : 0;
+			topMenu[1].childs[topMenu[1].childs.indexOf(topMenu_ViewShit[2])].icon = liveReload ? 1 : 0;
 		},
-		icon: 1,
-	}
+		icon: 1
+	},
+	{
+		label: "Reparse now",
+		onSelect: function(d) {
+			trace("Reparsing...");
+			lrc.parseFromSong(Charter.__song, Charter.__diff);
+		},
+		keybind: [FlxKey.CONTROL, FlxKey.R]
+	},
 ];
 
 function postCreate() {
@@ -45,8 +67,12 @@ function postCreate() {
 
 	lrc.parseFromSong(Charter.__song, Charter.__diff);
 
-	for (i in topMenuShit) {
+	for (i in topMenu_ViewShit) {
 		topMenu[3].childs.push(i);
+	}
+
+	for (i in topMenu_EditShit) {
+		topMenu[1].childs.push(i);
 	}
 }
 
@@ -61,25 +87,7 @@ function update(delta) {
 	lrc.update(delta);
 }
 
-function toggle() {
-	toggled = !toggled;
-}
-
 function postUpdate(delta) {
-	var atTimestamp:SequencedLine = lrc.sequence[lrc.getLineAtTime(Conductor.songPosition).id];
-
-	if (atTimestamp.id != lastIdPlayed) {
-		lyrCurrentLine.y += lyrCurrentLine.height * (atTimestamp.id - lastIdPlayed < 0 ? -1 : 1);
-	}
-	lastIdPlayed = atTimestamp.id;
-
-	lyrCurrentLine.text = atTimestamp.content;
-	lyrCurrentLine.y = CoolUtil.fpsLerp(lyrCurrentLine.y, uiCamera.height / 2 - lyrCurrentLine.height / 2, 0.2);
-
-	if (FlxG.keys.justPressed.L) {
-		toggle();
-	}
-
 	progress += delta * 2.5 * (toggled ? 1 : -1);
 
 	if (progress > 1)
@@ -91,10 +99,20 @@ function postUpdate(delta) {
 		i.alpha = progress;
 		i.x = 4 - FlxEase.backIn(1 - progress) * 16;
 	}
+
+	var atTimestamp:SequencedLine = lrc.sequence[lrc.getLineAtTime(Conductor.songPosition)?.id] ?? lrc.sequence[lrc.sequence.length - 1];
+
+	if (atTimestamp.id != lastIdPlayed) {
+		lyrCurrentLine.y += lyrCurrentLine.height * (atTimestamp.id - lastIdPlayed < 0 ? -1 : 1);
+	}
+	lastIdPlayed = atTimestamp.id;
+
+	lyrCurrentLine.text = atTimestamp.content;
+	lyrCurrentLine.y = CoolUtil.fpsLerp(lyrCurrentLine.y, uiCamera.height / 2 - lyrCurrentLine.height / 2, 0.2);
 }
 
 function draw() {
-	var startAt:Int = lrc.getLineAtTime(Conductor.songPosition).id;
+	var startAt:Int = lrc.getLineAtTime(Conductor.songPosition)?.id ?? -1;
 	var linesGone:Int = 0;
 	var renderLimit:Int = 8;
 
@@ -103,6 +121,8 @@ function draw() {
 
 	for (i in 0...lrc.sequence.length) {
 		if (startAt < i) {
+			if (startAt == -1)
+				continue;
 			lyrNextLine.text += "\n" + lrc.sequence[i].content;
 			linesGone++;
 
@@ -114,7 +134,7 @@ function draw() {
 
 	lyrPreviousLine.text = "";
 	for (i in (startAt - renderLimit)...startAt) {
-		if (i < 0)
+		if (i < 0 || startAt == -1)
 			continue;
 		lyrPreviousLine.text += "\n" + lrc.sequence[i].content ?? "";
 	}

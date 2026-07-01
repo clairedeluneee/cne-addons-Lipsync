@@ -11,6 +11,8 @@ import source.Signal;
 	The object used to handle lyrics.
 **/
 class LyricHandler extends FlxBasic {
+	public var currentLine:Null<SequencedLine>;
+
 	/**
 	 * The `SequencedLine`s for this `LyricHandler`.
 	 */
@@ -48,6 +50,8 @@ class LyricHandler extends FlxBasic {
 	 */
 	public var offset:Float = 0;
 
+	public var raw:Array<String> = [];
+
 	public function new() {
 		super();
 		onLyricShow = new Signal();
@@ -60,14 +64,17 @@ class LyricHandler extends FlxBasic {
 	public function parseString(string:String):Void {
 		var lengthofBothArrays:Int = sequence.length;
 
+		raw.resize(0);
 		sequence.resize(0);
 		unplayedLines.resize(0);
 		elapsedLines.resize(0);
 
 		var candidates:Array<String> = string.split("\n");
 		var gotLines:Int = 0;
+		var curLine:Int = 0;
 
 		for (line in candidates) {
+			raw.push(line);
 			line = StringTools.trim(line);
 			var inBrackets:String = line.substring(line.indexOf("["), line.indexOf("]"));
 
@@ -94,7 +101,7 @@ class LyricHandler extends FlxBasic {
 				continue;
 			}
 
-			var seq:SequencedLine = new SequencedLine(timestamp, StringTools.trim(line.substring(line.indexOf("]") + 1)), gotLines);
+			var seq:SequencedLine = new SequencedLine(timestamp, StringTools.trim(line.substring(line.indexOf("]") + 1)), gotLines, curLine);
 
 			gotLines++;
 
@@ -102,7 +109,7 @@ class LyricHandler extends FlxBasic {
 			unplayedLines.push(seq);
 		}
 
-		var blank:SequencedLine = new SequencedLine(0, "", -1);
+		var blank:SequencedLine = new SequencedLine(0, "", -1, -1);
 
 		sequence.insert(0, blank);
 		unplayedLines.insert(0, blank);
@@ -145,6 +152,7 @@ class LyricHandler extends FlxBasic {
 			if ((i.timestamp + offset) < Conductor.songPosition && !i.played) {
 				i.played = true;
 				onLyricShow.dispatch(i);
+				currentLine = i;
 				elapsedLines.push(unplayedLines.shift());
 				linesPlayed++;
 			}
