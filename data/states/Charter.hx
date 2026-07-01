@@ -32,18 +32,38 @@ var topMenu_ViewShit:Array<Dynamic> = [
 var topMenu_EditShit:Array<Dynamic> = [
 	null,
 	{
-		label: "Seek to current lyric position",
+		label: "Seek to previous line",
+		onSelect: function(d) {
+			if (lrc.sequence(lrc.sequence.indexOf(lrc.currentLine) - 2) != null) {
+				Conductor.songPosition = lrc.currentLine.timestamp;
+			}
+		},
+		keybind: [FlxKey.CONTROL, FlxKey.LEFT]
+	},
+	{
+		label: "Seek to current line",
 		onSelect: function(d) {
 			if (lrc.currentLine != null) {
 				Conductor.songPosition = lrc.currentLine.timestamp;
 			}
 		},
+		keybind: [FlxKey.CONTROL, FlxKey.SPACE]
 	},
+	{
+		label: "Seek to next line",
+		onSelect: function(d) {
+			if (lrc.unplayedLines[0] != null) {
+				Conductor.songPosition = lrc.unplayedLines[0].timestamp;
+			}
+		},
+		keybind: [FlxKey.CONTROL, FlxKey.RIGHT]
+	},
+	null,
 	{
 		label: "Live reparse",
 		onSelect: function(d) {
 			liveReload = !liveReload;
-			topMenu[1].childs[topMenu[1].childs.indexOf(topMenu_ViewShit[2])].icon = liveReload ? 1 : 0;
+			topMenu[1].childs[topMenu[1].childs.indexOf(topMenu_ViewShit[3])].icon = liveReload ? 1 : 0;
 		},
 		icon: 1
 	},
